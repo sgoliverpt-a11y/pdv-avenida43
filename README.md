@@ -6,6 +6,11 @@ Sistema de PDV da loja Avenida 43 (Casa Albinel de Legumes, Rio de Janeiro), sub
 - **Back office no PC**: produtos, estoque, clientes, recibos, relatórios e configurações.
 - **Back end**: Supabase. **Hospedagem**: Vercel.
 
+## Ambientes
+
+- Supabase: projeto **PDV Avenida 43** (`zqqsbwjzicrkqdviuqud`, São Paulo).
+- Vercel: projeto `pdv-avenida43` no time Griffara. `main` publica em produção; cada PR gera uma prévia.
+
 ## Rodar localmente
 
 ```bash

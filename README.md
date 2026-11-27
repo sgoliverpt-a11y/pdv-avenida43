@@ -6,6 +6,11 @@ Sistema de PDV da loja Avenida 43 (Casa Albinel de Legumes, Rio de Janeiro), sub
 - **Back office no PC**: produtos, estoque, clientes, recibos, relatórios e configurações.
 - **Back end**: Supabase. **Hospedagem**: Vercel.
 
+## Ambientes
+
+- Supabase: projeto **PDV Avenida 43** (`zqqsbwjzicrkqdviuqud`, São Paulo).
+- Vercel: projeto `pdv-avenida43` no time Griffara. `main` publica em produção; cada PR gera uma prévia.
+
 ## Rodar localmente
 
 ```bash
@@ -34,3 +39,9 @@ node scripts/importar-loyverse.ts itens.csv --com-estoque > importacao.sql # e o
 ```
 
 Aplique o SQL gerado no Supabase. Pode rodar de novo: atualiza pelo Handle e pelo SKU.
+
+Clientes (Clientes > Exportar no Loyverse; importa só nome, telefone e anotação, sem pontos ou valores):
+
+```bash
+node scripts/importar-clientes-loyverse.ts clientes.csv > clientes.sql
+```

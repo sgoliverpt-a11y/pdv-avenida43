@@ -1,0 +1,19 @@
+:root {
+  --verde: #4caf50;      /* mesmo verde da barra do Loyverse que a equipe já conhece */
+  --verde-escuro: #2e7d32;
+  --texto: #1d1d1b;
+  --fundo: #ffffff;
+  --suave: #6b6b66;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--fundo);
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.inicio { max-width: 480px; margin: 0 auto; padding: 32px 16px; display: grid; gap: 12px; }
+.inicio h1 { margin: 0; }
+.inicio p { margin: 0; color: var(--suave); }
+.inicio nav { display: grid; gap: 12px; margin-top: 16px; }
+.botao { display: block; padding: 16px; border-radius: 10px; background: var(--verde); color: #fff; text-align: center; text-decoration: none; font-weight: 600; }
+.botao.secundario { background: transparent; color: var(--verde); border: 2px solid var(--verde); }
+.aviso { color: #a15c00 !important; }

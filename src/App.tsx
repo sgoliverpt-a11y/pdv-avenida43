@@ -4,6 +4,7 @@ import { supabaseConfigurado } from './lib/supabase'
 function Inicio() {
   return (
     <main className="inicio">
+      <img src="/logo-192.png" alt="" width="120" height="120" />
       <h1>PDV Avenida 43</h1>
       <p>Casa Albinel de Legumes</p>
       {!supabaseConfigurado && <p className="aviso">Supabase ainda não configurado (.env).</p>}

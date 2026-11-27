@@ -40,7 +40,8 @@ const dados = produtos.map((p) => ({
   })),
 }))
 
-const json = JSON.stringify(dados).replace(/'/g, "''")
+// Campos vazios ficam de fora para o SQL ficar menor (->> devolve null para chave ausente)
+const json = JSON.stringify(dados, (_k, v) => (v === null || v === false || (Array.isArray(v) && v.length === 0) ? undefined : v)).replace(/'/g, "''")
 
 console.log(`-- Importação do Loyverse: ${produtos.length} produtos
 drop table if exists _lv;
@@ -52,7 +53,7 @@ on conflict (nome) do nothing;
 
 insert into public.produtos (nome, categoria_id, descricao, vendido_por, opcao1_nome, opcao2_nome, opcao3_nome, composto, loyverse_handle)
 select p->>'nome', (select id from public.categorias c where c.nome = p->>'cat'), p->>'desc', p->>'vp',
-       p->>'o1', p->>'o2', p->>'o3', jsonb_array_length(p->'comp') > 0, p->>'h'
+       p->>'o1', p->>'o2', p->>'o3', p ? 'comp', p->>'h'
   from _lv, jsonb_array_elements(d) p
 on conflict (loyverse_handle) do update set nome = excluded.nome, categoria_id = excluded.categoria_id, descricao = excluded.descricao,
   vendido_por = excluded.vendido_por, opcao1_nome = excluded.opcao1_nome, opcao2_nome = excluded.opcao2_nome,
@@ -60,7 +61,7 @@ on conflict (loyverse_handle) do update set nome = excluded.nome, categoria_id =
 
 insert into public.variantes (produto_id, vendido_por, opcao1_valor, opcao2_valor, opcao3_valor, sku, codigo_barras, preco, custo, controla_estoque, estoque_minimo, ordem)
 select pr.id, v->>'vp', v->>'v1', v->>'v2', v->>'v3', v->>'sku', v->>'cb', (v->>'preco')::numeric, (v->>'custo')::numeric,
-       (v->>'ctrl')::boolean, (v->>'min')::numeric, (v->>'ordem')::smallint
+       coalesce((v->>'ctrl')::boolean, false), (v->>'min')::numeric, coalesce((v->>'ordem')::smallint, 0)
   from _lv, jsonb_array_elements(d) p
   join public.produtos pr on pr.loyverse_handle = p->>'h'
   cross join jsonb_array_elements(p->'var') v
@@ -76,14 +77,14 @@ select public.registrar_contagem(va.id, (v->>'est')::numeric, null, 'Importado d
  where v->>'est' is not null and va.controla_estoque;
 
 delete from public.composicao c using _lv, jsonb_array_elements(d) p, public.variantes va, public.produtos pr
- where jsonb_array_length(p->'comp') > 0 and pr.loyverse_handle = p->>'h' and va.produto_id = pr.id and c.variante_id = va.id;
+ where p ? 'comp' and pr.loyverse_handle = p->>'h' and va.produto_id = pr.id and c.variante_id = va.id;
 
 insert into public.composicao (variante_id, componente_id, quantidade)
 select va.id, comp.id, (c->>'quantidade')::numeric
   from _lv, jsonb_array_elements(d) p
   join public.produtos pr on pr.loyverse_handle = p->>'h'
   join public.variantes va on va.produto_id = pr.id
-  cross join jsonb_array_elements(p->'comp') c
+  cross join jsonb_array_elements(coalesce(p->'comp', '[]')) c
   join public.variantes comp on comp.sku = c->>'sku';
 
 drop table _lv;`)

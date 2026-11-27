@@ -1,5 +1,6 @@
 :root {
-  --verde: #2f7d32;
+  --verde: #4caf50;      /* mesmo verde da barra do Loyverse que a equipe já conhece */
+  --verde-escuro: #2e7d32;
   --texto: #1d1d1b;
   --fundo: #ffffff;
   --suave: #6b6b66;

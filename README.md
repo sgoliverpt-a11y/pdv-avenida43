@@ -39,3 +39,9 @@ node scripts/importar-loyverse.ts itens.csv --com-estoque > importacao.sql # e o
 ```
 
 Aplique o SQL gerado no Supabase. Pode rodar de novo: atualiza pelo Handle e pelo SKU.
+
+Clientes (Clientes > Exportar no Loyverse; importa só nome, telefone e anotação, sem pontos ou valores):
+
+```bash
+node scripts/importar-clientes-loyverse.ts clientes.csv > clientes.sql
+```

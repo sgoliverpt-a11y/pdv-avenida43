@@ -4,6 +4,7 @@
 
 export interface VarianteImportada {
   sku: string | null
+  vendidoPor: 'peso' | 'unidade'
   codigoBarras: string | null
   opcoes: [string | null, string | null, string | null]
   preco: number | null
@@ -69,6 +70,19 @@ function numero(s: string | undefined): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+// "Kg", "Prata Kg", "Kg Media" são por peso; "Caixa", "Saco 12 Kg", "Rede 1 Kg", "Dúzia" são por unidade
+const EMBALAGEM = /\b(caixa|cx|saco|sc|rede|bandeja|bdj|duzia|und|unid|unidade|cartela|molho|meia)\b/
+const PESO = /(\bkg\b|\bquilo|\bkilo)/
+export function vendidoPorVariante(produtoPorPeso: boolean, opcoes: (string | null)[]): 'peso' | 'unidade' {
+  const v = norm(opcoes.filter(Boolean).join(' '))
+  if (!v) return produtoPorPeso ? 'peso' : 'unidade'
+  if (EMBALAGEM.test(v)) return 'unidade'
+  if (PESO.test(v)) return 'peso'
+  return 'unidade'
+}
+
+const semHtml = (s: string | null) => (s ? s.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || null : null)
+
 const sim = (s: string | undefined) => ['y', 'yes', 's', 'sim', 'true', '1'].includes(norm(s ?? ''))
 const texto = (s: string | undefined) => (s && s.trim() !== '' ? s.trim() : null)
 
@@ -125,7 +139,7 @@ export function lerItensLoyverse(csv: string): { produtos: ProdutoImportado[]; a
       p = {
         handle, nome,
         categoria: texto(get(l, C.categoria)),
-        descricao: texto(get(l, C.descricao)),
+        descricao: semHtml(texto(get(l, C.descricao))),
         vendidoPor: sim(get(l, C.peso)) ? 'peso' : 'unidade',
         opcaoNomes: [texto(get(l, C.op1n)), texto(get(l, C.op2n)), texto(get(l, C.op3n))],
         variantes: [], componentes: [],
@@ -147,10 +161,11 @@ export function lerItensLoyverse(csv: string): { produtos: ProdutoImportado[]; a
     if (ehVariante && (nome || sku || ops.some(Boolean))) {
       p.variantes.push({
         sku,
+        vendidoPor: vendidoPorVariante(p.vendidoPor === 'peso', ops),
         codigoBarras: texto(get(l, C.barras)),
         opcoes: ops,
         preco: numero(get(l, C.precoLoja)) ?? numero(get(l, C.precoPadrao)),
-        custo: numero(get(l, C.custo)),
+        custo: numero(get(l, C.custo)) || null, // Loyverse exporta 0.00 quando não há custo
         controlaEstoque: C.estoqueCtrl < 0 ? true : sim(get(l, C.estoqueCtrl)),
         estoque: numero(get(l, C.estoqueLoja)),
         estoqueMinimo: numero(get(l, C.minimoLoja)),
